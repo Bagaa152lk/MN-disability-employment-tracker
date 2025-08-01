@@ -15,6 +15,8 @@ module.exports = {
         muted: '#d1d5db',
         'muted-foreground': '#6b7280',
         foreground: '#111827',
+        danger: '#f53737cf',
+        success: '#21d321aa',
       },
     },
   },
