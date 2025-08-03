@@ -51,18 +51,30 @@ export const getAimagList = () => {
   }));
 };
 
-// Function to get unique soums by aimag code
 export const getSoumListByAimag = (aimagCode) => {
   const soums = new Map();
+  const soumBagCount = new Map();
+
   parsedData
     .filter((row) => row.aimagcode === aimagCode)
     .forEach((row) => {
-      if (!soums.has(row.soumcode)) {
-        soums.set(row.soumcode, row.soumname);
+      const { soumcode, soumname, bagcode } = row;
+
+      if (!soums.has(soumcode)) {
+        soums.set(soumcode, soumname);
+        soumBagCount.set(soumcode, new Set()); // initialize set for bags
       }
+
+      soumBagCount.get(soumcode).add(bagcode); // add bag to the set
     });
-  return Array.from(soums, ([code, name]) => ({ code, name }));
+
+  return Array.from(soums, ([code, name]) => ({
+    code,
+    name,
+    childcnt: soumBagCount.get(code)?.size || 0,
+  }));
 };
+
 
 // Function to get bags by aimag and soum code
 export const getBagListBySoum = (aimagCode, soumCode) => {

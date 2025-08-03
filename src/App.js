@@ -14,6 +14,8 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Main />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/:aimagcode" element={<Main />} />
+            <Route path="/:aimagcode/:soumcode" element={<Main />} />
           </Route>
         </Routes>
       </Router>

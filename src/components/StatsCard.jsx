@@ -1,17 +1,18 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import Status from "./Status";
 import ApiService from "../services/ApiService";
-// import { useGlobal } from "../context/PercentContext";
+import { useNavigate, useParams } from "react-router-dom";
 
-const StatsCard = ({ name, childcnt, code }) => {
-//   const { setTotalPercent } = useGlobal();
+const StatsCard = ({ name, childcnt, code, collectData, setHeaderTitle }) => {
+  const navigate = useNavigate();
+  const { aimagcode, soumcode } = useParams();
   const [progress, setProgress] = useState(null);
 
   const getProgress = () => {
-    ApiService("get", `/progress/${code}`)
+    ApiService("get", `/progress/${aimagcode && soumcode ? `${aimagcode}/${code}` : code}`)
       .then((res) => {
-        // setTotalPercent((prev) => prev + (res.percent ?? 0) * 1);
+        collectData({ ...res, code: code });
         setProgress(res);
       })
       .catch((err) => console.error(err));
@@ -22,7 +23,16 @@ const StatsCard = ({ name, childcnt, code }) => {
   }, []);
 
   return (
-    <div className="rounded-lg border bg-card text-foreground shadow-sm transition-all duration-200 hover:shadow-lg border-l-4 border-l-primary cursor-pointer hover:scale-[1.02]">
+    <div
+      className="rounded-lg border bg-card text-foreground shadow-sm transition-all duration-200 hover:shadow-lg border-l-4 border-l-primary cursor-pointer hover:scale-[1.02]"
+      onClick={e => {
+        e.preventDefault();
+        setHeaderTitle(name);
+        if (!soumcode) {
+          navigate(`${code}`);
+        }
+      }}
+    >
       <div className="flex flex-col space-y-1.5 p-6 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -53,7 +63,7 @@ const StatsCard = ({ name, childcnt, code }) => {
           {progress && <Status percent={(progress.percent ?? 0) * 1} />}
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          {childcnt} сум/дүүрэг
+          {aimagcode && soumcode ? null : childcnt} {aimagcode && soumcode ? "" : aimagcode ? "баг/хороо" : "сум/дүүрэг"}
         </p>
       </div>
       <div className="p-6 pt-0 space-y-4">
