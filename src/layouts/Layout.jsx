@@ -1,30 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import Header from "../components/Header";
+import { useGlobal } from "../context/GlobalContext";
 
 const Layout = () => {
-  const [dataCollect, setDataCollect] = useState([]);
-  const [headerTitle, setHeaderTitle] = useState("");
+  const { getTreeData } = useGlobal();
+  const treeData = getTreeData();
+  const [dataList, setDataList] = useState([]);
 
-  const collectData = (newData) => {
-    setDataCollect(prev => {
-      if (!prev.find(ff => ff.code === newData.code)) {
-        prev = [...prev, newData];
-      }
-      return prev;
-    });
-  }
+  console.log('treedata:', treeData);
 
-  const clearCollect = () => {
-    setDataCollect([]);
-  }
+  useEffect(() => {
+    if (dataList.length === 0)
+      setDataList(treeData);
+  }, [treeData]);
 
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
-          <Header dataList={dataCollect ?? []} headerTitle={headerTitle} />
-          <Outlet context={{ collectData, clearCollect, setHeaderTitle }} />
+          <Outlet context={{ dataList, setDataList }} />
         </div>
       </div>
     </div>

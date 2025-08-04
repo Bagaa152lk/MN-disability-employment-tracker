@@ -1,29 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { numberFormat } from "../utils/functions";
+import { getSoumListByAimag, numberFormat } from "../utils/functions";
 import { useParams } from "react-router-dom";
 import PagePath from "./PagePath";
+import { useGlobal } from "../context/GlobalContext";
 
-const Header = ({ dataList, headerTitle }) => {
+const Header = ({ collect, setDataList, headerTitle }) => {
+  const { getTreeData } = useGlobal();
+  const treeData = getTreeData();
   const { aimagcode, soumcode } = useParams();
   const [sumData, setSumData] = useState({ sumqty: 0, sumtotal: 0 });
 
   useEffect(() => {
     let _sum1 = 0, _sum2 = 0;
-    dataList?.forEach((elm) => {
+    collect?.forEach((elm) => {
       _sum1 += ((elm.total ?? 0) * 1);
       _sum2 += (((elm.total ?? 0) * 1) * ((elm.percent ?? 0) * 1) / 100);
     })
     console.log('sum', { sumtotal: _sum1, sumqty: _sum2 });
     setSumData({ sumtotal: _sum1, sumqty: _sum2 });
-  }, [dataList])
+  }, [collect])
 
   return (
     <div className="bg-gradient-to-r from-primary to-accent text-white p-6 rounded-lg shadow-lg">
       <div className="flex items-center gap-4 mb-4">
-        {soumcode ?
-          <PagePath title={headerTitle} subtitle={"Баг/хорооны бүртгэлийн явц"} /> :
+        {aimagcode && soumcode ?
+          <PagePath title={headerTitle} subtitle={"Баг/хорооны бүртгэлийн явц"} changeDataList={() => setDataList(getSoumListByAimag(treeData, aimagcode))} /> :
           aimagcode ?
-            <PagePath title={headerTitle} subtitle={"Сум/дүүргийн бүртгэлийн явц"} /> :
+            <PagePath title={headerTitle} subtitle={"Сум/дүүргийн бүртгэлийн явц"} changeDataList={() => setDataList(treeData)} /> :
             <div>
               <h1 className="text-2xl font-bold">
                 Хөгжлийн бэрхшээлтэй иргэдийн хөдөлмөр эрхлэлтийн судалгаа
@@ -34,7 +37,7 @@ const Header = ({ dataList, headerTitle }) => {
             </div>
         }
       </div>
-      {dataList.length > 0 &&
+      {collect.length > 0 &&
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <div className="flex items-center gap-3">

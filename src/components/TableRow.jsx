@@ -4,18 +4,22 @@ import Status from "./Status";
 import { ChevronRight } from "lucide-react";
 import ApiService from "../services/ApiService";
 import { useNavigate, useParams } from "react-router-dom";
+import useLoading from "../hooks/useLoading";
 
-const TableRow = ({ name, code, setHeaderTitle }) => {
+const TableRow = ({ name, code, children, setHeaderTitle, setDataList }) => {
   const navigate = useNavigate();
+  const { showLoading } = useLoading();
   const { aimagcode, soumcode } = useParams();
   const [progress, setProgress] = useState(null);
 
   const getProgress = () => {
+    showLoading(true);
     ApiService("get", `/progress/${aimagcode && soumcode ? `${aimagcode}/${code}` : code}`)
       .then((res) => {
         setProgress(res);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => showLoading(false));
   };
 
   useEffect(() => {
@@ -49,6 +53,7 @@ const TableRow = ({ name, code, setHeaderTitle }) => {
               e.preventDefault();
               setHeaderTitle(name);
               navigate(`${code}`);
+              setDataList(children);
             }}
             disabled={soumcode}
           >

@@ -3,19 +3,29 @@ import ProgressBar from "./ProgressBar";
 import Status from "./Status";
 import ApiService from "../services/ApiService";
 import { useNavigate, useParams } from "react-router-dom";
+import useLoading from "../hooks/useLoading";
 
-const StatsCard = ({ name, childcnt, code, collectData, setHeaderTitle }) => {
+const StatsCard = ({ name, childcnt, code, children, setHeaderTitle, setDataList, setCollect }) => {
   const navigate = useNavigate();
+  const { showLoading } = useLoading();
   const { aimagcode, soumcode } = useParams();
   const [progress, setProgress] = useState(null);
 
   const getProgress = () => {
+    showLoading(true);
     ApiService("get", `/progress/${aimagcode && soumcode ? `${aimagcode}/${code}` : code}`)
       .then((res) => {
-        collectData({ ...res, code: code });
         setProgress(res);
+        setCollect(prev => {
+          if (!prev.find((pp) => pp.code === res.code)) {
+            return [...prev, res];
+          } else {
+            return prev;
+          }
+        })
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => showLoading(false));
   };
 
   useEffect(() => {
@@ -30,6 +40,7 @@ const StatsCard = ({ name, childcnt, code, collectData, setHeaderTitle }) => {
         setHeaderTitle(name);
         if (!soumcode) {
           navigate(`${code}`);
+          setDataList(children)
         }
       }}
     >
