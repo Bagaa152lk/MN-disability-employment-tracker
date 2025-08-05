@@ -7,24 +7,8 @@ const GlobalContext = createContext();
 // Provider компонент
 export const GlobalProvider = ({ children }) => {
   const [totalPercent, setTotalPercent] = useState(0);
-  const [jsonData, setJsonData] = useState([]);
-
-  const fetchData = async () => {
-    const res = await fetch("/data.json");
-    let parsedData = await res.json();
-    setJsonData(parsedData);
-  };
-
-  const getTreeData = () => {
-    return convertToTree(jsonData);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [])
-
   return (
-    <GlobalContext.Provider value={{ totalPercent, setTotalPercent, jsonData, getTreeData }}>
+    <GlobalContext.Provider value={{ totalPercent, setTotalPercent }}>
       {children}
     </GlobalContext.Provider>
   );

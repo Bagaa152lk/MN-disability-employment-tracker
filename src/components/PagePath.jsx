@@ -1,7 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function PagePath({ title, subtitle, changeDataList }) {
+function PagePath({ title, subtitle }) {
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-4 mb-4">
@@ -10,7 +10,6 @@ function PagePath({ title, subtitle, changeDataList }) {
         onClick={(e) => {
           e.preventDefault();
           navigate(-1);
-          changeDataList();
         }}
       >
         <ChevronLeft className="h-5 w-5" />

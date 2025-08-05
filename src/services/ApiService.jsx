@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "/api",
+  baseURL: "http://sudalgaa.jobs-pwd.gov.mn/api",
 });
 
 const ApiService = async (method, url, data, headers = {}, responseType) => {
@@ -12,7 +12,6 @@ const ApiService = async (method, url, data, headers = {}, responseType) => {
 
     headers: {
       "Content-Type": "application/json",
-      Origin: "http://sudalgaa.jobs-pwd.gov.mn",
       ...headers,
     },
   };

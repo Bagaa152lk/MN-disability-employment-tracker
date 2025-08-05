@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import { useGlobal } from "../context/GlobalContext";
+import { Outlet, useLocation, useParams } from "react-router-dom";
+import { getBagListBySoum, getSoumListByAimag } from "../utils/functions";
 
-const Layout = () => {
-  const { getTreeData } = useGlobal();
-  const treeData = getTreeData();
-  const [dataList, setDataList] = useState([]);
+const Layout = ({ treeData }) => {
+  const location = useLocation();
 
-  console.log('treedata:', treeData);
+  const [dataList, setDataList] = useState(treeData);
+  const { aimagcode, soumcode } = useParams();
 
   useEffect(() => {
-    if (dataList.length === 0)
+    if (treeData.length > 0 && dataList.length === 0) {
       setDataList(treeData);
+    }
   }, [treeData]);
+
+  useEffect(() => {
+    if (aimagcode && soumcode) {
+      setDataList(getBagListBySoum(treeData, aimagcode, soumcode));
+    } else if (aimagcode) {
+      setDataList(getSoumListByAimag(treeData, aimagcode));
+    } else {
+      setDataList(treeData);
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
-          <Outlet context={{ dataList, setDataList }} />
+          <Outlet context={{ dataList }} />
         </div>
       </div>
     </div>

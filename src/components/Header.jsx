@@ -1,43 +1,47 @@
 import React, { useEffect, useState } from "react";
-import { getSoumListByAimag, numberFormat } from "../utils/functions";
 import { useParams } from "react-router-dom";
+import { numberFormat } from "../utils/functions";
 import PagePath from "./PagePath";
-import { useGlobal } from "../context/GlobalContext";
 
-const Header = ({ collect, setDataList, headerTitle }) => {
-  const { getTreeData } = useGlobal();
-  const treeData = getTreeData();
+const Header = ({ collect, headerTitle }) => {
   const { aimagcode, soumcode } = useParams();
   const [sumData, setSumData] = useState({ sumqty: 0, sumtotal: 0 });
 
   useEffect(() => {
-    let _sum1 = 0, _sum2 = 0;
+    let _sum1 = 0,
+      _sum2 = 0;
     collect?.forEach((elm) => {
-      _sum1 += ((elm.total ?? 0) * 1);
-      _sum2 += (((elm.total ?? 0) * 1) * ((elm.percent ?? 0) * 1) / 100);
-    })
-    console.log('sum', { sumtotal: _sum1, sumqty: _sum2 });
+      _sum1 += (elm.total ?? 0) * 1;
+      _sum2 += ((elm.total ?? 0) * 1 * ((elm.percent ?? 0) * 1)) / 100;
+    });
     setSumData({ sumtotal: _sum1, sumqty: _sum2 });
-  }, [collect])
+  }, [collect]);
 
   return (
     <div className="bg-gradient-to-r from-primary to-accent text-white p-6 rounded-lg shadow-lg">
       <div className="flex items-center gap-4 mb-4">
-        {aimagcode && soumcode ?
-          <PagePath title={headerTitle} subtitle={"Баг/хорооны бүртгэлийн явц"} changeDataList={() => setDataList(getSoumListByAimag(treeData, aimagcode))} /> :
-          aimagcode ?
-            <PagePath title={headerTitle} subtitle={"Сум/дүүргийн бүртгэлийн явц"} changeDataList={() => setDataList(treeData)} /> :
-            <div>
-              <h1 className="text-2xl font-bold">
-                Хөгжлийн бэрхшээлтэй иргэдийн хөдөлмөр эрхлэлтийн судалгаа
-              </h1>
-              <p className="text-white/90 mt-1">
-                Улсын хэмжээний бүртгэлийн явцын хяналт
-              </p>
-            </div>
-        }
+        {aimagcode && soumcode ? (
+          <PagePath
+            title={headerTitle.soumname}
+            subtitle={"Баг/хорооны бүртгэлийн явц"}
+          />
+        ) : aimagcode ? (
+          <PagePath
+            title={headerTitle.aimagname}
+            subtitle={"Сум/дүүргийн бүртгэлийн явц"}
+          />
+        ) : (
+          <div>
+            <h1 className="text-2xl font-bold">
+              Хөгжлийн бэрхшээлтэй иргэдийн хөдөлмөр эрхлэлтийн судалгаа
+            </h1>
+            <p className="text-white/90 mt-1">
+              Улсын хэмжээний бүртгэлийн явцын хяналт
+            </p>
+          </div>
+        )}
       </div>
-      {collect.length > 0 &&
+      {collect.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <div className="flex items-center gap-3">
@@ -87,7 +91,9 @@ const Header = ({ collect, setDataList, headerTitle }) => {
               </svg>
               <div>
                 <p className="text-white/90 text-sm">Зорилтот тоо</p>
-                <p className="text-2xl font-bold">{numberFormat(sumData.sumtotal)}</p>
+                <p className="text-2xl font-bold">
+                  {numberFormat(sumData.sumtotal)}
+                </p>
               </div>
             </div>
           </div>
@@ -111,12 +117,19 @@ const Header = ({ collect, setDataList, headerTitle }) => {
               <div>
                 <p className="text-white/90 text-sm">Гүйцэтгэл</p>
                 <p className="text-2xl font-bold">
-                  {numberFormat((sumData.sumqty / (sumData.sumtotal === 0 ? 1 : sumData.sumtotal) * 100), 2)}%
+                  {numberFormat(
+                    (sumData.sumqty /
+                      (sumData.sumtotal === 0 ? 1 : sumData.sumtotal)) *
+                      100,
+                    2
+                  )}
+                  %
                 </p>
               </div>
             </div>
           </div>
-        </div>}
+        </div>
+      )}
     </div>
   );
 };
