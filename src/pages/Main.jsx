@@ -1,23 +1,75 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ViewToggle from "../components/ViewToggle";
 import StatsCard from "../components/StatsCard";
 import TableRow from "../components/TableRow";
 import { useOutletContext, useParams } from "react-router-dom";
 import Header from "../components/Header";
+import useLoading from "../hooks/useLoading";
+import ApiService from "../services/ApiService";
 
 const Main = () => {
-  const { aimagcode, soumcode } = useParams();
   const { dataList } = useOutletContext();
+  const { showLoading } = useLoading();
+  const { aimagcode, soumcode } = useParams();
+
+  const [localList, setLocalList] = useState([]);
   const [view, setView] = useState("card");
   const [headerTitle, setHeaderTitle] = useState({
     aimagname: "",
     soumname: "",
   });
-  const [collect, setCollect] = useState([]);
+  const [sumData, setSumData] = useState({ sumtotal: 0, sumqty: 0 });
+
+  useEffect(() => {
+    if (!dataList || dataList.length === 0) {
+      setLocalList([]);
+      return;
+    }
+
+    const loadProgress = async () => {
+      try {
+        showLoading(true);
+        const promises = dataList.map((dd) => {
+          const id =
+            aimagcode && soumcode ? `${aimagcode}/${dd.code}` : dd.code;
+          return ApiService("get", `/progress/${id}`)
+            .then((res) => ({ ...dd, progress: res }))
+            .catch((err) => {
+              console.error("progress fetch error for", dd.code, err);
+              return { ...dd, progress: null };
+            });
+        });
+
+        const results = await Promise.all(promises);
+        setLocalList(results);
+      } finally {
+        showLoading(false);
+      }
+    };
+
+    loadProgress();
+  }, [dataList]);
+
+  useEffect(() => {
+    if (!localList.length) {
+      setSumData({ sumtotal: 0, sumqty: 0 });
+      return;
+    }
+
+    let _sum1 = 0,
+      _sum2 = 0;
+    localList.forEach(({ progress }) => {
+      _sum1 += (progress.total ?? 0) * 1;
+      _sum2 +=
+        ((progress.total ?? 0) * 1 * ((progress.percent ?? 0) * 1)) / 100;
+    });
+
+    setSumData({ sumtotal: _sum1, sumqty: _sum2 });
+  }, [localList]);
 
   return (
     <>
-      <Header collect={collect} headerTitle={headerTitle} />
+      <Header headerTitle={headerTitle} sumData={sumData} />
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">
           {aimagcode && soumcode
@@ -28,43 +80,25 @@ const Main = () => {
         </h2>
         <ViewToggle view={view} setView={setView} />
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {view &&
-          view === "card" &&
-          dataList.map((elm, index) => (
+        {view === "card" &&
+          localList.map((elm, idx) => (
             <StatsCard
-              key={index}
+              key={elm.code ?? idx}
               {...elm}
               setHeaderTitle={setHeaderTitle}
-              setCollect={setCollect}
             />
           ))}
-        {view && view === "table" && (
+
+        {view === "table" && (
           <div className="col-span-full">
             <table className="min-w-full bg-card border">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="p-3 text-left text-sm font-medium text-foreground">
-                    Нэр
-                  </th>
-                  <th
-                    className="p-3 text-left text-sm font-medium text-foreground"
-                    colSpan={2}
-                  >
-                    Гүйцэтгэл
-                  </th>
-                  <th className="p-3 text-left text-sm font-medium text-foreground">
-                    Төлөв
-                  </th>
-                  <th className="p-3 text-left text-sm font-medium text-foreground">
-                    Дэлгэрэнгүй
-                  </th>
-                </tr>
-              </thead>
+              <thead>{/* ... */}</thead>
               <tbody>
-                {dataList.map((elm, index) => (
+                {localList.map((elm, index) => (
                   <TableRow
-                    key={index}
+                    key={elm.code ?? index}
                     {...elm}
                     setHeaderTitle={setHeaderTitle}
                   />

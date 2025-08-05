@@ -6,9 +6,9 @@ const GlobalContext = createContext();
 
 // Provider компонент
 export const GlobalProvider = ({ children }) => {
-  const [totalPercent, setTotalPercent] = useState(0);
+  const [sumCnt, setSumCnt] = useState(0);
   return (
-    <GlobalContext.Provider value={{ totalPercent, setTotalPercent }}>
+    <GlobalContext.Provider value={{ sumCnt, setSumCnt }}>
       {children}
     </GlobalContext.Provider>
   );
