@@ -59,9 +59,9 @@ const Main = () => {
     let _sum1 = 0,
       _sum2 = 0;
     localList.forEach(({ progress }) => {
-      _sum1 += (progress.total ?? 0) * 1;
+      _sum1 += (progress?.total ?? 0) * 1;
       _sum2 +=
-        ((progress.total ?? 0) * 1 * ((progress.percent ?? 0) * 1)) / 100;
+        ((progress?.total ?? 0) * 1 * ((progress.percent ?? 0) * 1)) / 100;
     });
 
     setSumData({ sumtotal: _sum1, sumqty: _sum2 });
